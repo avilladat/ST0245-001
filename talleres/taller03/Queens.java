@@ -28,7 +28,7 @@ public class Queens {
         }
     }
 
-    public static void SolveQueens(int n) {
+    public static void solveQueens(int n) {
         int[] board = new int[n];
         LinkedList<int[]> solutions = new LinkedList<int[]>();
         for (int i = 0; i < n; i++) {
@@ -48,7 +48,7 @@ public class Queens {
 
     public static void main(String[] args) {
         double t = System.currentTimeMillis();
-        SolveQueens(11);
+        solveQueens(11);
         System.out.println(System.currentTimeMillis()-t);
     }
 }
