@@ -66,16 +66,16 @@ public class MyBinarySearchTree {
     private void printPreOrderAux(MyNode node) {
         System.out.println(node.data);
         if (node.left != null)
-            printInOrderAux(node.left);
+            printPreOrderAux(node.left);
         if (node.right != null)
-            printInOrderAux(node.right);
+            printPreOrderAux(node.right);
     }
 
     private void printPosOrderAux(MyNode node) {
         if (node.left != null)
-            printInOrderAux(node.left);
+            printPosOrderAux(node.left);
         if (node.right != null)
-            printInOrderAux(node.right);
+            printPosOrderAux(node.right);
         System.out.println(node.data);
     }
 
