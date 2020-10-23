@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * Implementacion de un grafo dirigido usando matrices de adyacencia
  *
- * @author Mauricio Toro, Mateo Agudelo, <su nombre>
+ * @author Mauricio Toro, Mateo Agudelo, Alejandro Villada, Cristian Alzate
  */
 public class DigraphAM extends Digraph {
 
