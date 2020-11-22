@@ -1,6 +1,7 @@
 import Funciones_para_el_arbol as funciones
-import Arbol as Arbol
+import Arbol
 import time
+
 
 def obtener_Posibles_Valores_Para_Cada_Atributo(datos, atributos):
     """Calcula los posibles valores que puede tomar cada variable.
@@ -121,12 +122,12 @@ def encontrarMejorCondicionEntreLosAtributos(datos, atributos):
     return maximaGanancia
     
 
-def crearArbol():
+def crearArbol(nombreArchivo):
     """Esta funcion se encarga de llamar los metodos necesarios para generar el arbol.
 
     :return: None
     """
-    datos = funciones.leerCSV("0_test_balanced_5000.csv")
+    datos = funciones.leerCSV(nombreArchivo)
     atributos = datos.columns
     atributos = atributos.drop("exito")
     mejorDecision = encontrarMejorCondicionEntreLosAtributos(datos, atributos)
@@ -140,6 +141,7 @@ def crearArbol():
     crearArbolAux(datosIzq, datosDer, arbol, atributos, "mitad")
     
     escribirArbol(arbol)
+    return arbol
 
 
 def crearArbolAux(datosIzq, datosDer, arbol, atributos, lado):
@@ -154,14 +156,14 @@ def crearArbolAux(datosIzq, datosDer, arbol, atributos, lado):
     """
     propiedadShannonIzq = funciones.propiedadDeShannon(datosIzq)
     propiedadShannonDer = funciones.propiedadDeShannon(datosDer)
-    if (propiedadShannonIzq == 0 and propiedadShannonDer == 0):
-        print("Entro")
+    if ((propiedadShannonIzq == 0 and propiedadShannonDer == 0) or (len(datosIzq) <= 100 and (len(datosDer) <= 100))):
+        #print("Entro1")
         if (lado == "izquierda"):
             arbol.prediccion = "return True"
         elif (lado == "derecha"):
             arbol.prediccion = "return False"
     elif(len(atributos) < 1):
-        print("Entro")
+        #print("Entro2")
         if (lado == "izquierda"):
             arbol.prediccion = "return True"
         elif (lado == "derecha"):
@@ -189,9 +191,12 @@ def crearArbolAux(datosIzq, datosDer, arbol, atributos, lado):
             datosDerPrimero = mejorDecision[6]
             atributos1 = atributos.drop(mejorDecision[2])
             crearArbolAux(datosIzqPrimero, datosDerPrimero, arbol.nodoIzquierdo, atributos1, "izquierda")
-        #else:
-            #arbol.nodoIzquierdo.tipoDeCondicion = "return True"
-            #arbol.tipoDeCondicion = "return True"
+        else:
+            arbol.nodoIzquierdo = Arbol.Nodo("", 0, "")
+            if (lado == "izquierda"):
+                arbol.nodoIzquierdo.prediccion = "return True"
+            elif (lado == "derecha"):
+                arbol.nodoIzquierdo.prediccion = "return False"
 
         if (len(datosDer) >= 100):
             mejorDecision2 = encontrarMejorCondicionEntreLosAtributos(datosDer, atributos)
@@ -200,13 +205,13 @@ def crearArbolAux(datosIzq, datosDer, arbol, atributos, lado):
             datosDerSegundo = mejorDecision2[6]
             atributos2 = atributos.drop(mejorDecision2[2])
             crearArbolAux(datosIzqSegundo, datosDerSegundo, arbol.nodoDerecho, atributos2, "derecha")
-        #else:
-            #arbol.nodoDerecho.tipoDeCondicion = "return False"
-            #arbol.tipoDeCondicion = "return False"
-    if (lado == "izquierda"):
-            arbol.prediccion = "return True"
-    elif (lado == "derecha"):
-        arbol.prediccion = "return False"
+        else:
+            arbol.nodoDerecho = Arbol.Nodo("", 0, "")
+            if (lado == "izquierda"):
+                arbol.nodoDerecho.prediccion = "return True"
+            elif (lado == "derecha"):
+                arbol.nodoDerecho.prediccion = "return False"
+    
 
 def escribirArbol(arbol):
     """Se encarga escribir el código resultante de construir el árbol, para poder predecir el resultado de los estudiantes.
@@ -216,7 +221,7 @@ def escribirArbol(arbol):
     """
     archivo = open("Predecir.py", "w")
     archivo.write("def predecir(dataset): \n")
-    escribirArbolAux(arbol, archivo, "  ")
+    escribirArbolAux(arbol, archivo, "   ")
     archivo.close()
 
 def escribirArbolAux(arbol, archivo, espacio):
@@ -230,24 +235,65 @@ def escribirArbolAux(arbol, archivo, espacio):
     if (arbol.nodoIzquierdo == None and arbol.nodoDerecho == None):
         archivo.write(espacio + arbol.prediccion + "\n")
     elif(arbol.nodoDerecho == None):
-        nuevoEspacio = "    " + espacio
-        archivo.write(espacio + "if" + " (dataset[[" + "\"" + arbol.atributo + "\"]]" + arbol.tipoDeCondicion + str(arbol.limite)  + "):\n")
+        nuevoEspacio = "   " + espacio
+        #if (list(dataset["punt_ingles"])[0]>=51.0):
+        archivo.write(espacio + "if" + "(list(dataset[" + "\"" + arbol.atributo + "\"])[0]" + arbol.tipoDeCondicion + str(arbol.limite)  + "):\n")
         escribirArbolAux(arbol.nodoIzquierdo, archivo, nuevoEspacio)
-    elif(arbol.nodoIzquierdo == None):
-        nuevoEspacio = "    " + espacio
+
         archivo.write(espacio + "else: \n")
-        escribirArbolAux(arbol.nodoDerecho, archivo, nuevoEspacio)
+        archivo.write(espacio + "   " + "return False" + "\n")
+    elif(arbol.nodoIzquierdo == None):
+        #nuevoEspacio = "   " + espacio
+        #archivo.write(espacio + "else: \n")
+        escribirArbolAux(arbol.nodoDerecho, archivo, espacio)
     else:
         nuevoEspacio =  "   " + espacio
-        archivo.write(espacio + "if" + " (dataset[[" + "\"" + arbol.atributo + "\"]]" + arbol.tipoDeCondicion + str(arbol.limite)  + "):\n")
+        archivo.write(espacio + "if" + "(list(dataset[" + "\"" + arbol.atributo + "\"])[0]" + arbol.tipoDeCondicion + str(arbol.limite)  + "):\n")
         escribirArbolAux(arbol.nodoIzquierdo, archivo, nuevoEspacio)
 
         archivo.write(espacio + "else: \n")
         escribirArbolAux(arbol.nodoDerecho, archivo, nuevoEspacio)
 
-    
 
+def predecir(dataFrame):
+    import Predecir
+    for i in range(len(dataFrame)):
+        estudiante = dataFrame.iloc[0 : 1]
+        print(Predecir.predecir(estudiante))
+        dataFrame = dataFrame.drop([i])
+
+def predecirYCalcularError(dataFrame):
+    import Predecir
+    buenos = 0
+    total = 0
+    numeroTrues = 0
+    numeroFalses = 0
+    for i in range(len(dataFrame)):
+        estudiante = dataFrame.iloc[0 : 1]
+        descicion = Predecir.predecir(estudiante)
+        #print(descicion)
+        if ((descicion == True and list(estudiante["exito"])[0] == 1) or (descicion == False and list(estudiante["exito"])[0] == 0)):
+            buenos += 1
+        if (descicion == True):
+            numeroTrues += 1
+        else:
+            numeroFalses += 1
+        total += 1
+        dataFrame = dataFrame.drop([i])
+    print("Numero de predicciones correctas: ", buenos)
+    print("Porcentaje de acierto: ", buenos/total)
+    print("Numero de True: ", numeroTrues)
+    print("Numero de False: ", numeroFalses)
     
+    
+def alturaArbolAux(arbol): #//2T(n/2) siendo n numero de nodos
+    if(arbol == None):
+        return 0
+    else:
+        return max(alturaArbolAux(arbol.nodoIzquierdo),alturaArbolAux(arbol.nodoDerecho))+1
+
+def alturaArbol(arbol):
+    return alturaArbolAux(arbol)
 
 
 
@@ -259,17 +305,27 @@ print(datos)
  """
 
 
-""" 
+
 tiempoInicial = time.time()
-nodo = crearArbol()
+nodo = crearArbol("0_train_balanced_15000.csv")
 tiempoFinal = time.time()
 print(tiempoFinal - tiempoInicial)
 print("Funcionó!!!!!!!!!!!")
 
- """
 
+datos = funciones.leerCSV("0_train_balanced_15000.csv")
+predecirYCalcularError(datos)
 
- 
+print()
+print(alturaArbol(nodo))
+
+""" if(list(estudiante["punt_ingles"])[0]>=51.0):
+    print(list(datos["punt_ingles"])[0])
+    print("Si")
+if(list(datos["punt_ciencias_sociales"])[0]>=50.0):
+    print(list(datos["punt_ciencias_sociales"])[0])
+    print("Si") """
+
 """ 
 posiblesValores = obtener_Posibles_Valores_Para_Un_Atributo(datos, "punt_lenguaje")
 valores = list(datos["punt_lenguaje"])
@@ -277,3 +333,4 @@ ganancia = encontrarMejorCondicionDeUnAtributo(datos, "punt_lenguaje", posiblesV
 print(ganancia[0])
 print(ganancia[1])
  """
+
