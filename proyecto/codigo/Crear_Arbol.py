@@ -256,6 +256,10 @@ def escribirArbolAux(arbol, archivo, espacio):
 
 
 def predecir(dataFrame):
+    """Después de creado el arbol, se llama la función predecir, para decidir cómo le va a ir a un
+    estudiante en las pruebas Saber Pro
+    :param dataFrame: este va a ser el dataFrame que contiene los estudiantes que se quieren predecir
+    """
     import Predecir
     for i in range(len(dataFrame)):
         estudiante = dataFrame.iloc[0 : 1]
@@ -263,6 +267,12 @@ def predecir(dataFrame):
         dataFrame = dataFrame.drop([i])
 
 def predecirYCalcularError(dataFrame):
+    """Esta función se utiliza para saber qué tan bien está el arbol de decisión, ya que tenemos
+    un conjunto de datos que nos permite saber cúales estudiantes tuvieron éxito y cuáles no, asi que
+    se cuentan las predicciones correctas y despúes se imprime la división entre dichas predicciones 
+    y el número total de estudiantes
+    :param dataFrame: este va a ser el dataFrame que contiene los estudiantes que se quieren predecir
+    """
     import Predecir
     buenos = 0
     total = 0
@@ -285,24 +295,7 @@ def predecirYCalcularError(dataFrame):
     print("Numero de True: ", numeroTrues)
     print("Numero de False: ", numeroFalses)
     
-    
-def alturaArbolAux(arbol): #//2T(n/2) siendo n numero de nodos
-    if(arbol == None):
-        return 0
-    else:
-        return max(alturaArbolAux(arbol.nodoIzquierdo),alturaArbolAux(arbol.nodoDerecho))+1
 
-def alturaArbol(arbol):
-    return alturaArbolAux(arbol)
-
-
-
-""" datos = funciones.leerCSV("lite.csv")
-atributos = datos.columns
-atributos = atributos.drop("exito")
-datos = datos.drop(datos[datos["fami_numlibros"] == "26 A 100 LIBROS"].index)
-print(datos)
- """
 
 
 
@@ -315,9 +308,6 @@ print("Funcionó!!!!!!!!!!!")
 
 datos = funciones.leerCSV("0_train_balanced_15000.csv")
 predecirYCalcularError(datos)
-
-print()
-print(alturaArbol(nodo))
 
 """ if(list(estudiante["punt_ingles"])[0]>=51.0):
     print(list(datos["punt_ingles"])[0])
